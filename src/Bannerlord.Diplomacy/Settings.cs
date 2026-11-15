@@ -70,6 +70,18 @@ namespace Diplomacy
         [SettingPropertyGroup(HeadingKingdomDiplomacy)]
         public bool LeaderClanMarriageAffectsAlliance { get; set; } = true;
 
+        [SettingPropertyInteger("{=Jw3RnD8a}Maximum Alliances per Kingdom", 0, 10, Order = 35, RequireRestart = false, HintText = "{=Tq7LmV2c}The number of alliances a kingdom can be in at the same time, for both player and AI kingdoms. Alliances that already exist are kept when this is lowered. 0 uses the game's own limit. Default value is 0.")]
+        [SettingPropertyGroup(HeadingKingdomDiplomacy)]
+        public int MaximumAlliancesPerKingdom { get; set; } = 0;
+
+        [SettingPropertyBool("{=Zk4PvS9e}Allow Alliances Without Shared Border", Order = 36, RequireRestart = false, HintText = "{=Xb6GdN3u}If enabled, kingdoms that do not border each other can form alliances, up to the limit below. Each of them still needs a threatening neighbor of its own. Default value is disabled.")]
+        [SettingPropertyGroup(HeadingKingdomDiplomacy)]
+        public bool AllowAlliancesWithoutBorder { get; set; } = false;
+
+        [SettingPropertyInteger("{=Lc9WfB5m}Maximum Alliances Without Shared Border", 1, 10, Order = 37, RequireRestart = false, HintText = "{=Hd2YtK7p}How many of a kingdom's alliances can be with kingdoms it does not border. Only used when alliances without a shared border are allowed, and never raises the total number of alliances a kingdom can be in. Default value is 1.")]
+        [SettingPropertyGroup(HeadingKingdomDiplomacy)]
+        public int MaximumAlliancesWithoutBorder { get; set; } = 1;
+
         [SettingPropertyInteger("{=V35hUfcc}Non-Aggression Pact Duration in Days", 0, 1000, Order = 50, RequireRestart = false, HintText = "{=KXLGZEPh}The duration (in days) that a non-aggression pact will last. Default value is 84 (one standard game year).")]
         [SettingPropertyGroup(HeadingKingdomDiplomacy)]
         public int NonAggressionPactDuration { get; set; } = 84;
@@ -94,7 +106,7 @@ namespace Diplomacy
         [SettingPropertyGroup(HeadingKingdomDiplomacy)]
         public int NoWarOnGoodRelationsThreshold { get; set; } = 30;
 
-        [SettingPropertyInteger("{=jwNKk8P7}No Wars When Married", 0, 100, Order = 1004, RequireRestart = false, HintText = "{=xcMzKH48}If active, kingdom leader clans that have a marriage between each other will not start wars. Default value is active.")]
+        [SettingPropertyBool("{=jwNKk8P7}No Wars When Married", Order = 1004, RequireRestart = false, HintText = "{=xcMzKH48}If active, kingdom leader clans that have a marriage between each other will not start wars. Default value is active.")]
         [SettingPropertyGroup(HeadingKingdomDiplomacy)]
         public bool NoWarWhenMarriedLeaderClans { get; set; } = true;
 

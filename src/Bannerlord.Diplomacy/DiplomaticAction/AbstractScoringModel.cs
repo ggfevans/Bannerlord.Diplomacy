@@ -37,55 +37,39 @@ namespace Diplomacy.DiplomaticAction
             if (Settings.Instance!.LeaderClanMarriageAffectsAlliance && ourKingdom.RulingClan.HasMarriedClanLeaderRelation(otherKingdom.RulingClan))
                 explainedNum.Add(Scores.LeaderClanMarriage, CreateTextWithKingdom(SMarriageWithLeaderClan, otherKingdom));
 
+            // Every kingdom besides the two involved, by how it stands with them.
+            // Taken once: AllActiveKingdoms builds a new list on every access.
+
+            var otherKingdoms = KingdomExtensions.AllActiveKingdoms.Where(k => k != ourKingdom && k != otherKingdom).ToList();
+
+            bool IsOurEnemy(Kingdom k) => k.IsAtWarWith(ourKingdom) || k.IsAtConstantWarWith(ourKingdom);
+            bool IsTheirEnemy(Kingdom k) => k.IsAtWarWith(otherKingdom) || k.IsAtConstantWarWith(otherKingdom);
+
             // Common Enemies
 
-            var commonEnemies = ourKingdom.GetEnemyKingdoms().Intersect(otherKingdom.GetEnemyKingdoms());
-
-            foreach (var commonEnemy in commonEnemies)
+            foreach (var commonEnemy in otherKingdoms.Where(k => IsOurEnemy(k) && IsTheirEnemy(k)))
                 explainedNum.Add(Scores.HasCommonEnemy, CreateTextWithKingdom(SCommonEnemy, commonEnemy));
 
             // Their Alliances with Enemies
 
-            var alliedEnemies = KingdomExtensions.AllActiveKingdoms
-                .Where(k => k != ourKingdom
-                         && k != otherKingdom
-                         && k.IsAllyWith(otherKingdom)
-                         && (k.IsAtWarWith(ourKingdom) || k.IsAtConstantWarWith(ourKingdom)));
-
-            foreach (var alliedEnemy in alliedEnemies)
+            foreach (var alliedEnemy in otherKingdoms.Where(k => k.IsAllyWith(otherKingdom) && IsOurEnemy(k)))
                 explainedNum.Add(Scores.ExistingAllianceWithEnemy, CreateTextWithKingdom(SAlliedToEnemy, alliedEnemy));
 
-            // Their Alliances with Neutrals
+            // Their Alliances with Neutrals. An ally we share with them isn't held against them.
 
-            var alliedNeutrals = KingdomExtensions.AllActiveKingdoms
-                .Where(k => k != ourKingdom
-                         && k != otherKingdom
-                         && k.IsAllyWith(otherKingdom)
-                         && !(k.IsAtWarWith(ourKingdom) || k.IsAtConstantWarWith(ourKingdom)));
-
-            // FIXME: alliedNeutrals also includes common allies as it's coded... Should they be scored differently? Probable answer: YES!
-
-            foreach (var alliedNeutral in alliedNeutrals)
+            foreach (var alliedNeutral in otherKingdoms.Where(k => k.IsAllyWith(otherKingdom) && !IsOurEnemy(k) && !k.IsAllyWith(ourKingdom)))
                 explainedNum.Add(Scores.ExistingAllianceWithNeutral, CreateTextWithKingdom(SAlliedToNeutral, alliedNeutral));
 
-            var pactEnemies = KingdomExtensions.AllActiveKingdoms
-                .Where(k => k != ourKingdom
-             && k != otherKingdom
-             && DiplomaticAgreementManager.HasNonAggressionPact(otherKingdom, k, out _)
-             && FactionManager.IsAtWarAgainstFaction(ourKingdom, k));
+            // Their Non-Aggression Pacts with Enemies
 
-            foreach (var pactEnemy in pactEnemies)
+            var pactKingdoms = otherKingdoms.Where(k => DiplomaticAgreementManager.HasNonAggressionPact(otherKingdom, k, out _)).ToList();
+
+            foreach (var pactEnemy in pactKingdoms.Where(k => FactionManager.IsAtWarAgainstFaction(ourKingdom, k)))
                 explainedNum.Add(Scores.NonAggressionPactWithEnemy, CreateTextWithKingdom(SPactWithEnemy, pactEnemy));
 
-            // Their Alliances with Neutrals
+            // Their Non-Aggression Pacts with Neutrals
 
-            var pactNeutrals = KingdomExtensions.AllActiveKingdoms
-                .Where(k => k != ourKingdom
-                         && k != otherKingdom
-                         && DiplomaticAgreementManager.HasNonAggressionPact(otherKingdom, k, out _)
-                         && !FactionManager.IsAtWarAgainstFaction(ourKingdom, k));
-
-            foreach (var pactNeutral in pactNeutrals)
+            foreach (var pactNeutral in pactKingdoms.Where(k => !FactionManager.IsAtWarAgainstFaction(ourKingdom, k)))
                 explainedNum.Add(Scores.NonAggressionPactWithNeutral, CreateTextWithKingdom(SPactWithNeutral, pactNeutral));
 
             // Relationship

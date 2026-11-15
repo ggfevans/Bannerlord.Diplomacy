@@ -60,6 +60,7 @@ namespace Diplomacy.Models
 
         // Mod strings.
         private const string SAllianceTendency = "{=Vb7cKfGe}Alliance tendency (Diplomacy setting)";
+        private const string STooManyDistantAlliances = "{=Rp8MxE6v}Number of alliances {KINGDOM_NAME} already has with realms it does not border: {NUMBER_OF_ALLIES}/{MAX_NUMBER_OF_ALLIES}";
 
         private readonly AllianceModel _previousModel;
 
@@ -70,7 +71,13 @@ namespace Diplomacy.Models
 
         public override CampaignTime MaxDurationOfAlliance => _previousModel.MaxDurationOfAlliance;
         public override CampaignTime MaxDurationOfWarParticipation => _previousModel.MaxDurationOfWarParticipation;
-        public override int MaxNumberOfAlliances => _previousModel.MaxNumberOfAlliances;
+        public override int MaxNumberOfAlliances => ConfiguredMaxNumberOfAlliances ?? _previousModel.MaxNumberOfAlliances;
+
+        /// <summary>
+        /// The "Maximum Alliances per Kingdom" setting, or null while it is left at 0 to keep the game's limit.
+        /// </summary>
+        internal static int? ConfiguredMaxNumberOfAlliances
+            => Settings.Instance is { MaximumAlliancesPerKingdom: > 0 } settings ? settings.MaximumAlliancesPerKingdom : null;
         public override CampaignTime DurationForOffers => _previousModel.DurationForOffers;
 
         public override int GetCallToWarCost(Kingdom callingKingdom, Kingdom calledKingdom, Kingdom kingdomToCallToWarAgainst)
@@ -110,7 +117,21 @@ namespace Diplomacy.Models
 
             // The previous model scores through Campaign.Current.Models.AllianceModel, so this still
             // lands in our GetScoreOfStartingAlliance.
-            return _previousModel.CanMakeAlliance(kingdom, targetKingdom, evaluatingFaction, out reason, includeReason);
+            if (!_previousModel.CanMakeAlliance(kingdom, targetKingdom, evaluatingFaction, out reason, includeReason))
+                return false;
+
+            // A configured limit is enforced here as well, whatever the previous model does with its own.
+            if (ConfiguredMaxNumberOfAlliances is { } maxAlliances)
+            {
+                var kingdomAtLimit = new[] { kingdom, targetKingdom }.FirstOrDefault(k => k.AlliedKingdoms.Count(ally => ally != kingdom && ally != targetKingdom) >= maxAlliances);
+                if (kingdomAtLimit is not null)
+                {
+                    reason = includeReason ? BuildNotFormedText(GetAlliancePenaltyText(kingdomAtLimit, true)) : null!;
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -160,7 +181,8 @@ namespace Diplomacy.Models
 
         /// <summary>
         /// Vanilla's precondition for scoring at all: the kingdoms must border each other and each must
-        /// have a neighbor more threatening than <see cref="Settings.AllianceThreatThreshold"/>.
+        /// have a neighbor more threatening than <see cref="Settings.AllianceThreatThreshold"/>. The border
+        /// requirement gives way to <see cref="Settings.AllowAlliancesWithoutBorder"/>, within its limit.
         /// <paramref name="rejection"/> is only built when <paramref name="includeDescription"/> is set.
         /// </summary>
         private static bool PassesAllianceGate(Kingdom querierKingdom, Kingdom queriedKingdom, bool includeDescription, out Threats threats, out TextObject? rejection)
@@ -176,8 +198,23 @@ namespace Diplomacy.Models
 
             if (!AreKingdomsNeighbors(querierKingdom, queriedKingdom))
             {
-                rejection = includeDescription ? new TextObject(SNotNeighbors) : null;
-                return false;
+                if (!Settings.Instance.AllowAlliancesWithoutBorder)
+                {
+                    rejection = includeDescription ? new TextObject(SNotNeighbors) : null;
+                    return false;
+                }
+
+                // Counted without each other, so that an alliance these two already have isn't held against itself.
+                var maxDistantAlliances = Settings.Instance.MaximumAlliancesWithoutBorder;
+                var querierCount = CountAlliancesWithoutBorder(querierKingdom, queriedKingdom);
+                var queriedCount = CountAlliancesWithoutBorder(queriedKingdom, querierKingdom);
+                if (querierCount >= maxDistantAlliances || queriedCount >= maxDistantAlliances)
+                {
+                    rejection = !includeDescription ? null : querierCount >= maxDistantAlliances
+                        ? BuildTooManyDistantAlliancesText(querierKingdom, querierCount, maxDistantAlliances)
+                        : BuildTooManyDistantAlliancesText(queriedKingdom, queriedCount, maxDistantAlliances);
+                    return false;
+                }
             }
 
             float threatThreshold = Settings.Instance.AllianceThreatThreshold;
@@ -236,6 +273,18 @@ namespace Diplomacy.Models
         {
             var text = new TextObject(SNotSeekingAlliance);
             text.SetTextVariable("KINGDOM_NAME", querierKingdom.Name);
+            return text;
+        }
+
+        private static int CountAlliancesWithoutBorder(Kingdom kingdom, Kingdom except)
+            => kingdom.AlliedKingdoms.Count(ally => ally != except && !AreKingdomsNeighbors(kingdom, ally));
+
+        private static TextObject BuildTooManyDistantAlliancesText(Kingdom kingdom, int distantAlliances, int maxDistantAlliances)
+        {
+            var text = new TextObject(STooManyDistantAlliances);
+            text.SetTextVariable("KINGDOM_NAME", kingdom.Name);
+            text.SetTextVariable("NUMBER_OF_ALLIES", distantAlliances);
+            text.SetTextVariable("MAX_NUMBER_OF_ALLIES", maxDistantAlliances);
             return text;
         }
 
@@ -360,10 +409,15 @@ namespace Diplomacy.Models
 
         private static float GetMarriageEffect(Kingdom querierKingdom, Kingdom queriedKingdom)
         {
+            if (!Settings.Instance!.LeaderClanMarriageAffectsAlliance)
+                return 0f;
+
             if (IsThereMarriageBetweenClans(querierKingdom.RulingClan, queriedKingdom.RulingClan))
                 return 8f;
 
-            if (querierKingdom.Leader is not null && (queriedKingdom.RulingClan?.AliveLords.Any(x => x.Spouse?.Father?.MapFaction == queriedKingdom) ?? false))
+            // A lesser tie: their ruling clan married into our kingdom, though not into our ruling clan.
+            // Vanilla compares the spouse's family against the queried kingdom itself, which looks like a slip.
+            if (querierKingdom.Leader is not null && (queriedKingdom.RulingClan?.AliveLords.Any(x => x.Spouse?.Father?.MapFaction == querierKingdom) ?? false))
                 return 4f;
 
             return 0f;

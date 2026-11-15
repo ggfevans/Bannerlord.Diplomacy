@@ -12,6 +12,10 @@ namespace Diplomacy.Extensions
 {
     public static class KingdomExtensions
     {
+        /// <summary>
+        /// A snapshot, built on every access, so it is safe to enumerate while kingdoms are created or
+        /// destroyed. Take it once before a loop that would otherwise ask for it repeatedly.
+        /// </summary>
         public static MBReadOnlyList<Kingdom> AllActiveKingdoms => new(Kingdom.All.Where(k => !k.IsEliminated).ToList());
 
         public static float GetExpansionism(this Kingdom kingdom) => ExpansionismManager.Instance!.GetExpansionism(kingdom);
@@ -25,7 +29,7 @@ namespace Diplomacy.Extensions
         private static float GetMedianStrength()
         {
             float medianStrength;
-            var kingdomStrengths = AllActiveKingdoms.Select(curKingdom => curKingdom.CurrentTotalStrength).OrderBy(a => a).ToArray();
+            var kingdomStrengths = Kingdom.All.Where(k => !k.IsEliminated).Select(curKingdom => curKingdom.CurrentTotalStrength).OrderBy(a => a).ToArray();
 
             var halfIndex = kingdomStrengths.Length / 2;
 

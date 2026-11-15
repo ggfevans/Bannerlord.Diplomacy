@@ -6,6 +6,7 @@
         public const string NotEnoughInfluence = "{=TS1iV2pO}Not enough influence!";
         public const string InAlliance = "{=KHJyWj9H}Cannot be in an alliance.";
         public const string AlliancesDisabled = "{=Hj2nWqYs}Alliances are disabled in the Diplomacy mod settings.";
+        public const string AllianceTooRecent = "{=Ng5CsU4r}This alliance cannot be broken for another {DAYS_LEFT} {?DAYS_LEFT.PLURAL_FORM}days{?}day{\\?}.";
         public const string NotEnoughGold = "{=IWZ91JVk}Not enough gold!";
         public const string Accept = "{=Y94H6XnK}Accept";
         public const string Decline = "{=cOgmdp9e}Decline";

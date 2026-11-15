@@ -1,9 +1,11 @@
-﻿using Bannerlord.UIExtenderEx.Attributes;
+﻿using Bannerlord.ButterLib.Common.Helpers;
+using Bannerlord.UIExtenderEx.Attributes;
 using Bannerlord.UIExtenderEx.ViewModels;
 
 using Diplomacy.Actions;
 using Diplomacy.Costs;
 using Diplomacy.DiplomaticAction;
+using Diplomacy.DiplomaticAction.GenericConditions;
 using Diplomacy.DiplomaticAction.NonAggressionPact;
 using Diplomacy.DiplomaticAction.WarPeace;
 using Diplomacy.Extensions;
@@ -55,6 +57,7 @@ namespace Diplomacy.ViewModelMixin
         private readonly Kingdom _faction1;
         private readonly Kingdom _faction2;
         private readonly ReturnFiefInterface _returnFiefInterface = new();
+        private readonly HasAuthorityCondition _hasAuthorityCondition = new();
         private bool _isReturnFiefVisible;
         private bool _isReturnFiefAvailable;
         private HintViewModel? _returnFiefHint;
@@ -201,10 +204,13 @@ namespace Diplomacy.ViewModelMixin
         {
             if (ViewModel!.HasAlliance)
             {
+                var breakAllianceException = GetBreakAllianceException();
+
                 DirectActionName = _TBreakAlliance.ToString();
-                DirectActionHint = new HintViewModel();
+                DirectActionHint = breakAllianceException is not null ? Compat.HintViewModel.Create(breakAllianceException) : new HintViewModel();
+                DirectActionInfluenceCost = 0;
                 IsDirectActionVisible = true;
-                IsDirectActionEnabled = true;
+                IsDirectActionEnabled = breakAllianceException is null;
                 IsAllianceVisible = false;
                 IsNonAggressionPactVisible = false;
                 return;
@@ -217,7 +223,7 @@ namespace Diplomacy.ViewModelMixin
             IsDirectActionVisible = true;
             IsDirectActionEnabled = declareWarException is null;
             DirectActionHint = declareWarException is not null ? Compat.HintViewModel.Create(declareWarException) : new HintViewModel();
-            DirectActionInfluenceCost = ViewModel!.HasAlliance ? 0 : (int) DiplomacyCostCalculator.DetermineCostForDeclaringWar(_faction1, true).Value;
+            DirectActionInfluenceCost = (int) DiplomacyCostCalculator.DetermineCostForDeclaringWar(_faction1, true).Value;
 
             IsAllianceVisible = true;
 
@@ -231,6 +237,24 @@ namespace Diplomacy.ViewModelMixin
 
             var napScore = NonAggressionPactScoringModel.Instance.GetScore(_faction2, _faction1, true);
             NonAggressionPactScoreHint = UpdateDiplomacyTooltip(napScore);
+        }
+
+        /// <summary>
+        /// Why the player can't break the alliance right now: they don't speak for the kingdom, or the
+        /// alliance is younger than <see cref="Settings.MinimumAllianceDuration"/>. Null when they can.
+        /// </summary>
+        private TextObject? GetBreakAllianceException()
+        {
+            if (!_hasAuthorityCondition.ApplyCondition(_faction1, _faction2, out var noAuthority, true))
+                return noAuthority;
+
+            if (!CooldownManager.HasBreakAllianceCooldown(_faction1, _faction2, out var elapsedDays))
+                return null;
+
+            var daysLeft = (int) System.Math.Ceiling(Settings.Instance!.MinimumAllianceDuration - elapsedDays);
+            var tooRecent = new TextObject(StringConstants.AllianceTooRecent);
+            LocalizationHelper.SetNumericVariable(tooRecent, "DAYS_LEFT", daysLeft);
+            return tooRecent;
         }
 
         private void UpdateReturnFiefAvailability()
@@ -295,7 +319,8 @@ namespace Diplomacy.ViewModelMixin
         {
             if (ViewModel!.HasAlliance)
             {
-                Campaign.Current.GetCampaignBehavior<AllianceCampaignBehavior>().EndAlliance(_faction1, _faction2);
+                if (GetBreakAllianceException() is null)
+                    Campaign.Current.GetCampaignBehavior<AllianceCampaignBehavior>().EndAlliance(_faction1, _faction2);
             }
             else
             {
