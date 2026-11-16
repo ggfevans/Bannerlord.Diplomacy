@@ -55,11 +55,9 @@ namespace Diplomacy.DiplomaticAction
             foreach (var alliedEnemy in otherKingdoms.Where(k => k.IsAllyWith(otherKingdom) && IsOurEnemy(k)))
                 explainedNum.Add(Scores.ExistingAllianceWithEnemy, CreateTextWithKingdom(SAlliedToEnemy, alliedEnemy));
 
-            // Their Alliances with Neutrals
+            // Their Alliances with Neutrals. An ally we share with them isn't held against them.
 
-            // FIXME: alliedNeutrals also includes common allies as it's coded... Should they be scored differently? Probable answer: YES!
-
-            foreach (var alliedNeutral in otherKingdoms.Where(k => k.IsAllyWith(otherKingdom) && !IsOurEnemy(k)))
+            foreach (var alliedNeutral in otherKingdoms.Where(k => k.IsAllyWith(otherKingdom) && !IsOurEnemy(k) && !k.IsAllyWith(ourKingdom)))
                 explainedNum.Add(Scores.ExistingAllianceWithNeutral, CreateTextWithKingdom(SAlliedToNeutral, alliedNeutral));
 
             // Their Non-Aggression Pacts with Enemies
