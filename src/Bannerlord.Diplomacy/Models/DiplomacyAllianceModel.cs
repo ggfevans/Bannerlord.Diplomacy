@@ -360,6 +360,9 @@ namespace Diplomacy.Models
 
         private static float GetMarriageEffect(Kingdom querierKingdom, Kingdom queriedKingdom)
         {
+            if (!Settings.Instance!.LeaderClanMarriageAffectsAlliance)
+                return 0f;
+
             if (IsThereMarriageBetweenClans(querierKingdom.RulingClan, queriedKingdom.RulingClan))
                 return 8f;
 
