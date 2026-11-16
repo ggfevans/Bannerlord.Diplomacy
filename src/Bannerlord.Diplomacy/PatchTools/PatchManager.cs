@@ -84,6 +84,7 @@ namespace Diplomacy.PatchTools
         private static readonly PatchClass[] _mainPatchClasses = new PatchClass[]
         {
             new DeclareWarBarterablePatch(),
+            new DefaultAllianceModelPatch(),
             new DefaultClanPoliticsModelPatch(),
             new DefaultDiplomacyModelPatch(),
             new DiplomaticBartersBehaviorPatch(),
