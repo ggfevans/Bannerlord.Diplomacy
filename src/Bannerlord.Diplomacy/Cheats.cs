@@ -121,7 +121,7 @@ namespace Diplomacy
                 return CampaignCheats.ErrorType;
 
             if (!CampaignCheats.CheckParameters(strings, 2) || CampaignCheats.CheckHelp(strings))
-                return "Format uses 2 kingdom ID parameters without spaces: diplomacy.form_non_aggression_pact [Kingdom1] [Kingdom2]";
+                return "Format uses 2 kingdom ID parameters without spaces: diplomacy.break_non_aggression_pact [Kingdom1] [Kingdom2]";
 
             var b1 = strings[0].ToLower();
             var b2 = strings[1].ToLower();
