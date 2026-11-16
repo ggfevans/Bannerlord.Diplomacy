@@ -219,6 +219,8 @@
     <string id="Rm8xPdLu" text="Kingdoms only consider an alliance when both of them have a neighbor whose threat score exceeds this value. The game's default of 430 requires a neighbor roughly 1.2 to 1.9 times stronger, which rarely happens on a balanced map. Lower it to make alliances more common; 0 lets any neighbor count. Default value is 430." />
     <string id="Hj2nWqYs" text="Alliances are disabled in the Diplomacy mod settings." />
     <string id="Vb7cKfGe" text="Alliance tendency (Diplomacy setting)" />
+    <string id="Jw3RnD8a" text="Maximum Alliances per Kingdom" />
+    <string id="Tq7LmV2c" text="The number of alliances a kingdom can be in at the same time, for both player and AI kingdoms. Alliances that already exist are kept when this is lowered. 0 uses the game's own limit. Default value is 0." />
     <string id="V35hUfcc" text="Non-Aggression Pact Duration in Days"/>
     <string id="KXLGZEPh" text="The duration (in days) that a non-aggression pact will last. Default value is 84 (one standard game year)."/>
     <string id="G8BhBnRG" text="Non-Aggression Pact Tendency" />

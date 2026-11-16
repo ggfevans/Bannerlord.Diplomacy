@@ -70,7 +70,13 @@ namespace Diplomacy.Models
 
         public override CampaignTime MaxDurationOfAlliance => _previousModel.MaxDurationOfAlliance;
         public override CampaignTime MaxDurationOfWarParticipation => _previousModel.MaxDurationOfWarParticipation;
-        public override int MaxNumberOfAlliances => _previousModel.MaxNumberOfAlliances;
+        public override int MaxNumberOfAlliances => ConfiguredMaxNumberOfAlliances ?? _previousModel.MaxNumberOfAlliances;
+
+        /// <summary>
+        /// The "Maximum Alliances per Kingdom" setting, or null while it is left at 0 to keep the game's limit.
+        /// </summary>
+        internal static int? ConfiguredMaxNumberOfAlliances
+            => Settings.Instance is { MaximumAlliancesPerKingdom: > 0 } settings ? settings.MaximumAlliancesPerKingdom : null;
         public override CampaignTime DurationForOffers => _previousModel.DurationForOffers;
 
         public override int GetCallToWarCost(Kingdom callingKingdom, Kingdom calledKingdom, Kingdom kingdomToCallToWarAgainst)
@@ -110,7 +116,21 @@ namespace Diplomacy.Models
 
             // The previous model scores through Campaign.Current.Models.AllianceModel, so this still
             // lands in our GetScoreOfStartingAlliance.
-            return _previousModel.CanMakeAlliance(kingdom, targetKingdom, evaluatingFaction, out reason, includeReason);
+            if (!_previousModel.CanMakeAlliance(kingdom, targetKingdom, evaluatingFaction, out reason, includeReason))
+                return false;
+
+            // A configured limit is enforced here as well, whatever the previous model does with its own.
+            if (ConfiguredMaxNumberOfAlliances is { } maxAlliances)
+            {
+                var kingdomAtLimit = new[] { kingdom, targetKingdom }.FirstOrDefault(k => k.AlliedKingdoms.Count(ally => ally != kingdom && ally != targetKingdom) >= maxAlliances);
+                if (kingdomAtLimit is not null)
+                {
+                    reason = includeReason ? BuildNotFormedText(GetAlliancePenaltyText(kingdomAtLimit, true)) : null!;
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

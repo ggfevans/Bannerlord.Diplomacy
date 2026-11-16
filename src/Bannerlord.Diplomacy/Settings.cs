@@ -70,6 +70,10 @@ namespace Diplomacy
         [SettingPropertyGroup(HeadingKingdomDiplomacy)]
         public bool LeaderClanMarriageAffectsAlliance { get; set; } = true;
 
+        [SettingPropertyInteger("{=Jw3RnD8a}Maximum Alliances per Kingdom", 0, 10, Order = 35, RequireRestart = false, HintText = "{=Tq7LmV2c}The number of alliances a kingdom can be in at the same time, for both player and AI kingdoms. Alliances that already exist are kept when this is lowered. 0 uses the game's own limit. Default value is 0.")]
+        [SettingPropertyGroup(HeadingKingdomDiplomacy)]
+        public int MaximumAlliancesPerKingdom { get; set; } = 0;
+
         [SettingPropertyInteger("{=V35hUfcc}Non-Aggression Pact Duration in Days", 0, 1000, Order = 50, RequireRestart = false, HintText = "{=KXLGZEPh}The duration (in days) that a non-aggression pact will last. Default value is 84 (one standard game year).")]
         [SettingPropertyGroup(HeadingKingdomDiplomacy)]
         public int NonAggressionPactDuration { get; set; } = 84;
