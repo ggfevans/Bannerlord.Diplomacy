@@ -172,9 +172,7 @@ namespace Diplomacy
             if (!Settings.Instance!.EnableWarExhaustion)
                 return "War exhaustion is disabled!";
 
-            var isNumeric = int.TryParse(strings[2], out var targetWarExhaustion);
-
-            if (!CampaignCheats.CheckParameters(strings, 3) || CampaignCheats.CheckHelp(strings) || !isNumeric)
+            if (!CampaignCheats.CheckParameters(strings, 3) || CampaignCheats.CheckHelp(strings) || !int.TryParse(strings[2], out var targetWarExhaustion))
                 return "Format uses 2 kingdom ID parameters without spaces and a war exhaustion integer: diplomacy.set_war_exhaustion [Kingdom1] [Kingdom2] [int]";
 
             var b1 = strings[0].ToLower();
