@@ -60,6 +60,7 @@ namespace Diplomacy.Models
 
         // Mod strings.
         private const string SAllianceTendency = "{=Vb7cKfGe}Alliance tendency (Diplomacy setting)";
+        private const string STooManyDistantAlliances = "{=Rp8MxE6v}Number of alliances {KINGDOM_NAME} already has with realms it does not border: {NUMBER_OF_ALLIES}/{MAX_NUMBER_OF_ALLIES}";
 
         private readonly AllianceModel _previousModel;
 
@@ -180,7 +181,8 @@ namespace Diplomacy.Models
 
         /// <summary>
         /// Vanilla's precondition for scoring at all: the kingdoms must border each other and each must
-        /// have a neighbor more threatening than <see cref="Settings.AllianceThreatThreshold"/>.
+        /// have a neighbor more threatening than <see cref="Settings.AllianceThreatThreshold"/>. The border
+        /// requirement gives way to <see cref="Settings.AllowAlliancesWithoutBorder"/>, within its limit.
         /// <paramref name="rejection"/> is only built when <paramref name="includeDescription"/> is set.
         /// </summary>
         private static bool PassesAllianceGate(Kingdom querierKingdom, Kingdom queriedKingdom, bool includeDescription, out Threats threats, out TextObject? rejection)
@@ -196,8 +198,23 @@ namespace Diplomacy.Models
 
             if (!AreKingdomsNeighbors(querierKingdom, queriedKingdom))
             {
-                rejection = includeDescription ? new TextObject(SNotNeighbors) : null;
-                return false;
+                if (!Settings.Instance.AllowAlliancesWithoutBorder)
+                {
+                    rejection = includeDescription ? new TextObject(SNotNeighbors) : null;
+                    return false;
+                }
+
+                // Counted without each other, so that an alliance these two already have isn't held against itself.
+                var maxDistantAlliances = Settings.Instance.MaximumAlliancesWithoutBorder;
+                var querierCount = CountAlliancesWithoutBorder(querierKingdom, queriedKingdom);
+                var queriedCount = CountAlliancesWithoutBorder(queriedKingdom, querierKingdom);
+                if (querierCount >= maxDistantAlliances || queriedCount >= maxDistantAlliances)
+                {
+                    rejection = !includeDescription ? null : querierCount >= maxDistantAlliances
+                        ? BuildTooManyDistantAlliancesText(querierKingdom, querierCount, maxDistantAlliances)
+                        : BuildTooManyDistantAlliancesText(queriedKingdom, queriedCount, maxDistantAlliances);
+                    return false;
+                }
             }
 
             float threatThreshold = Settings.Instance.AllianceThreatThreshold;
@@ -256,6 +273,18 @@ namespace Diplomacy.Models
         {
             var text = new TextObject(SNotSeekingAlliance);
             text.SetTextVariable("KINGDOM_NAME", querierKingdom.Name);
+            return text;
+        }
+
+        private static int CountAlliancesWithoutBorder(Kingdom kingdom, Kingdom except)
+            => kingdom.AlliedKingdoms.Count(ally => ally != except && !AreKingdomsNeighbors(kingdom, ally));
+
+        private static TextObject BuildTooManyDistantAlliancesText(Kingdom kingdom, int distantAlliances, int maxDistantAlliances)
+        {
+            var text = new TextObject(STooManyDistantAlliances);
+            text.SetTextVariable("KINGDOM_NAME", kingdom.Name);
+            text.SetTextVariable("NUMBER_OF_ALLIES", distantAlliances);
+            text.SetTextVariable("MAX_NUMBER_OF_ALLIES", maxDistantAlliances);
             return text;
         }
 

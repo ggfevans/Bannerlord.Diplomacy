@@ -74,6 +74,14 @@ namespace Diplomacy
         [SettingPropertyGroup(HeadingKingdomDiplomacy)]
         public int MaximumAlliancesPerKingdom { get; set; } = 0;
 
+        [SettingPropertyBool("{=Zk4PvS9e}Allow Alliances Without Shared Border", Order = 36, RequireRestart = false, HintText = "{=Xb6GdN3u}If enabled, kingdoms that do not border each other can form alliances, up to the limit below. Each of them still needs a threatening neighbor of its own. Default value is disabled.")]
+        [SettingPropertyGroup(HeadingKingdomDiplomacy)]
+        public bool AllowAlliancesWithoutBorder { get; set; } = false;
+
+        [SettingPropertyInteger("{=Lc9WfB5m}Maximum Alliances Without Shared Border", 1, 10, Order = 37, RequireRestart = false, HintText = "{=Hd2YtK7p}How many of a kingdom's alliances can be with kingdoms it does not border. Only used when alliances without a shared border are allowed, and never raises the total number of alliances a kingdom can be in. Default value is 1.")]
+        [SettingPropertyGroup(HeadingKingdomDiplomacy)]
+        public int MaximumAlliancesWithoutBorder { get; set; } = 1;
+
         [SettingPropertyInteger("{=V35hUfcc}Non-Aggression Pact Duration in Days", 0, 1000, Order = 50, RequireRestart = false, HintText = "{=KXLGZEPh}The duration (in days) that a non-aggression pact will last. Default value is 84 (one standard game year).")]
         [SettingPropertyGroup(HeadingKingdomDiplomacy)]
         public int NonAggressionPactDuration { get; set; } = 84;
