@@ -38,18 +38,8 @@ namespace Diplomacy
             if (b1 == b2)
                 return "Cannot ally a kingdom to itself!";
 
-            Kingdom? kingdom1 = null;
-            Kingdom? kingdom2 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-                else if (id == b2)
-                    kingdom2 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
+            var kingdom2 = FindKingdom(b2);
 
             if (kingdom1 is null && kingdom2 is null)
                 return "Could not find either required kingdom!";
@@ -80,18 +70,8 @@ namespace Diplomacy
             if (b1 == b2)
                 return "Cannot make a pact with itself!";
 
-            Kingdom? kingdom1 = null;
-            Kingdom? kingdom2 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-                else if (id == b2)
-                    kingdom2 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
+            var kingdom2 = FindKingdom(b2);
 
             if (kingdom1 is null && kingdom2 is null)
                 return "Could not find either required kingdom!";
@@ -129,18 +109,8 @@ namespace Diplomacy
             if (b1 == b2)
                 return "Cannot break a pact with itself!";
 
-            Kingdom? kingdom1 = null;
-            Kingdom? kingdom2 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-                else if (id == b2)
-                    kingdom2 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
+            var kingdom2 = FindKingdom(b2);
 
             if (kingdom1 is null && kingdom2 is null)
                 return "Could not find either required kingdom!";
@@ -181,18 +151,8 @@ namespace Diplomacy
             if (b1 == b2)
                 return "Cannot have war exhaustion with itself!";
 
-            Kingdom? kingdom1 = null;
-            Kingdom? kingdom2 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-                else if (id == b2)
-                    kingdom2 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
+            var kingdom2 = FindKingdom(b2);
 
             if (kingdom1 is null && kingdom2 is null)
                 return "Could not find either required kingdom!";
@@ -219,15 +179,7 @@ namespace Diplomacy
 
             var b1 = strings[0].ToLower();
 
-            Kingdom? kingdom1 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
 
             if (kingdom1 is null)
                 return "Could not find required kingdom!";
@@ -248,15 +200,7 @@ namespace Diplomacy
 
             var b1 = strings[0].ToLower();
 
-            Kingdom? kingdom1 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
 
             if (kingdom1 is null)
                 return "Could not find required kingdom!";
