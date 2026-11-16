@@ -360,10 +360,15 @@ namespace Diplomacy.Models
 
         private static float GetMarriageEffect(Kingdom querierKingdom, Kingdom queriedKingdom)
         {
+            if (!Settings.Instance!.LeaderClanMarriageAffectsAlliance)
+                return 0f;
+
             if (IsThereMarriageBetweenClans(querierKingdom.RulingClan, queriedKingdom.RulingClan))
                 return 8f;
 
-            if (querierKingdom.Leader is not null && (queriedKingdom.RulingClan?.AliveLords.Any(x => x.Spouse?.Father?.MapFaction == queriedKingdom) ?? false))
+            // A lesser tie: their ruling clan married into our kingdom, though not into our ruling clan.
+            // Vanilla compares the spouse's family against the queried kingdom itself, which looks like a slip.
+            if (querierKingdom.Leader is not null && (queriedKingdom.RulingClan?.AliveLords.Any(x => x.Spouse?.Father?.MapFaction == querierKingdom) ?? false))
                 return 4f;
 
             return 0f;

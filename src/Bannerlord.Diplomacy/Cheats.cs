@@ -38,18 +38,8 @@ namespace Diplomacy
             if (b1 == b2)
                 return "Cannot ally a kingdom to itself!";
 
-            Kingdom? kingdom1 = null;
-            Kingdom? kingdom2 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-                else if (id == b2)
-                    kingdom2 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
+            var kingdom2 = FindKingdom(b2);
 
             if (kingdom1 is null && kingdom2 is null)
                 return "Could not find either required kingdom!";
@@ -80,18 +70,8 @@ namespace Diplomacy
             if (b1 == b2)
                 return "Cannot make a pact with itself!";
 
-            Kingdom? kingdom1 = null;
-            Kingdom? kingdom2 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-                else if (id == b2)
-                    kingdom2 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
+            var kingdom2 = FindKingdom(b2);
 
             if (kingdom1 is null && kingdom2 is null)
                 return "Could not find either required kingdom!";
@@ -121,7 +101,7 @@ namespace Diplomacy
                 return CampaignCheats.ErrorType;
 
             if (!CampaignCheats.CheckParameters(strings, 2) || CampaignCheats.CheckHelp(strings))
-                return "Format uses 2 kingdom ID parameters without spaces: diplomacy.form_non_aggression_pact [Kingdom1] [Kingdom2]";
+                return "Format uses 2 kingdom ID parameters without spaces: diplomacy.break_non_aggression_pact [Kingdom1] [Kingdom2]";
 
             var b1 = strings[0].ToLower();
             var b2 = strings[1].ToLower();
@@ -129,18 +109,8 @@ namespace Diplomacy
             if (b1 == b2)
                 return "Cannot break a pact with itself!";
 
-            Kingdom? kingdom1 = null;
-            Kingdom? kingdom2 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-                else if (id == b2)
-                    kingdom2 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
+            var kingdom2 = FindKingdom(b2);
 
             if (kingdom1 is null && kingdom2 is null)
                 return "Could not find either required kingdom!";
@@ -172,9 +142,7 @@ namespace Diplomacy
             if (!Settings.Instance!.EnableWarExhaustion)
                 return "War exhaustion is disabled!";
 
-            var isNumeric = int.TryParse(strings[2], out var targetWarExhaustion);
-
-            if (!CampaignCheats.CheckParameters(strings, 3) || CampaignCheats.CheckHelp(strings) || !isNumeric)
+            if (!CampaignCheats.CheckParameters(strings, 3) || CampaignCheats.CheckHelp(strings) || !int.TryParse(strings[2], out var targetWarExhaustion))
                 return "Format uses 2 kingdom ID parameters without spaces and a war exhaustion integer: diplomacy.set_war_exhaustion [Kingdom1] [Kingdom2] [int]";
 
             var b1 = strings[0].ToLower();
@@ -183,18 +151,8 @@ namespace Diplomacy
             if (b1 == b2)
                 return "Cannot have war exhaustion with itself!";
 
-            Kingdom? kingdom1 = null;
-            Kingdom? kingdom2 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-                else if (id == b2)
-                    kingdom2 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
+            var kingdom2 = FindKingdom(b2);
 
             if (kingdom1 is null && kingdom2 is null)
                 return "Could not find either required kingdom!";
@@ -221,15 +179,7 @@ namespace Diplomacy
 
             var b1 = strings[0].ToLower();
 
-            Kingdom? kingdom1 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
 
             if (kingdom1 is null)
                 return "Could not find required kingdom!";
@@ -250,15 +200,7 @@ namespace Diplomacy
 
             var b1 = strings[0].ToLower();
 
-            Kingdom? kingdom1 = null;
-
-            foreach (var k in KingdomExtensions.AllActiveKingdoms)
-            {
-                var id = k.Name.ToString().ToLower().Replace(" ", "");
-
-                if (id == b1)
-                    kingdom1 = k;
-            }
+            var kingdom1 = FindKingdom(b1);
 
             if (kingdom1 is null)
                 return "Could not find required kingdom!";

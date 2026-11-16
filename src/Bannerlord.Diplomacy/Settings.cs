@@ -94,7 +94,7 @@ namespace Diplomacy
         [SettingPropertyGroup(HeadingKingdomDiplomacy)]
         public int NoWarOnGoodRelationsThreshold { get; set; } = 30;
 
-        [SettingPropertyInteger("{=jwNKk8P7}No Wars When Married", 0, 100, Order = 1004, RequireRestart = false, HintText = "{=xcMzKH48}If active, kingdom leader clans that have a marriage between each other will not start wars. Default value is active.")]
+        [SettingPropertyBool("{=jwNKk8P7}No Wars When Married", Order = 1004, RequireRestart = false, HintText = "{=xcMzKH48}If active, kingdom leader clans that have a marriage between each other will not start wars. Default value is active.")]
         [SettingPropertyGroup(HeadingKingdomDiplomacy)]
         public bool NoWarWhenMarriedLeaderClans { get; set; } = true;
 

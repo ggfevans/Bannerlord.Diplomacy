@@ -104,6 +104,7 @@
 
     <string id="0WPWbx70" text="Form Alliance" />
     <string id="K4GraLTn" text="Break Alliance" />
+    <string id="Ng5CsU4r" text="This alliance cannot be broken for another {DAYS_LEFT} {?DAYS_LEFT.PLURAL_FORM}days{?}day{\?}." />
     <string id="5R7twvD2" text="Make Peace" />
     <string id="nkOVblQ4" text="Declare War" />
 

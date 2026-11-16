@@ -220,7 +220,7 @@ namespace Diplomacy.CivilWar.Factions
                 int value;
                 if (hasSponsorClan && hasRulerClan)
                     value = -20;
-                else if (hasSponsorClan || hasSponsorClan) // TODO: maybe hasSponsorClan || hasRulerClan ?
+                else if (hasSponsorClan || hasRulerClan)
                     value = -10;
                 else
                     value = -5;
